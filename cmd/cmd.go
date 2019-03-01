@@ -15,6 +15,8 @@ func Parse() (err error) {
 		err = Build()
 	case "create":
 		err = Create()
+	case "parse":
+		err = ParsePkgBuild()
 	case "project":
 		err = Project()
 	case "pull":

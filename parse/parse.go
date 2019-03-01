@@ -51,6 +51,14 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 
 	pac.Init()
 
+	if err = PkgBuild(pac, path); err != nil {
+		return
+	}
+
+	return
+}
+
+func PkgBuild(pac *pack.Pack, path string) (err error) {
 	file, err := utils.Open(path)
 	if err != nil {
 		return
@@ -191,7 +199,7 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 					err = &SyntaxError{
 						errors.Newf(
 							"parse: Unexpected char '%s' expected "+
-							"'\"' or '`' (%d: %s)", val[:1], n, line),
+								"'\"' or '`' (%d: %s)", val[:1], n, line),
 					}
 					return
 				}

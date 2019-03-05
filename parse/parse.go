@@ -2,9 +2,12 @@ package parse
 
 import (
 	"bufio"
+	"context"
+	"fmt"
 	"github.com/dropbox/godropbox/errors"
 	"github.com/pacur/pacur/pack"
 	"github.com/pacur/pacur/utils"
+	"mvdan.cc/sh/v3/shell"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -59,6 +62,15 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 }
 
 func PkgBuild(pac *pack.Pack, path string) (err error) {
+
+	vars, sherr := shell.SourceFile(context.TODO(), path)
+	if sherr != nil {
+		return sherr
+	}
+	for key, val := range vars {
+		fmt.Printf("%#v\t%#v\t%#v\t%#v\n", key, val.Str, val.List, val.Map)
+	}
+
 	file, err := utils.Open(path)
 	if err != nil {
 		return

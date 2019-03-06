@@ -8,7 +8,6 @@ import (
 )
 
 type Pack struct {
-	priorities  map[string]int
 	Targets     []string
 	Distro      string
 	Release     string
@@ -42,12 +41,9 @@ type Pack struct {
 	PostInst    []string
 	PreRm       []string
 	PostRm      []string
-	Variables   map[string]string
 }
 
 func (p *Pack) Init() {
-	p.priorities = map[string]int{}
-
 	p.FullRelease = p.Distro
 	if p.Release != "" {
 		p.FullRelease += "-" + p.Release

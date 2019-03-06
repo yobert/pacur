@@ -65,25 +65,24 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 	return
 }
 
-func bashit(path string) error {
-	ctx := context.Background()
-
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("could not open: %v", err)
-	}
-	defer f.Close()
-	file, err := syntax.NewParser().Parse(f, path)
-	if err != nil {
-		return fmt.Errorf("could not parse: %v", err)
-	}
-
-	vars, err := shell.SourceNode(ctx, file)
+func PkgBuild(pac *pack.Pack, path string) (err error) {
+	file, err := utils.Open(path)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	/*	for key, val := range vars {
+	rootNode, err := syntax.NewParser().Parse(file, path)
+	if err != nil {
+		return errors.Newf("parse: File %#v: %v", path, err)
+	}
+
+	vars, err := shell.SourceNode(context.Background(), rootNode)
+	if err != nil {
+		return errors.Newf("parse: SourceNode on file %#v: %v", path, err)
+	}
+
+/*		for key, val := range vars {
 		fmt.Printf("%#v\t", key)
 		switch val.Kind {
 		case expand.String:
@@ -105,14 +104,15 @@ func bashit(path string) error {
 	_ = expand.String
 	_ = vars
 
-	syntax.Walk(file, func(node syntax.Node) bool {
+	funcDecls := map[string]string{}
+
+	syntax.Walk(rootNode, func(node syntax.Node) bool {
 		switch x := node.(type) {
 		case *syntax.FuncDecl:
-			if x.Name != nil {
-				fmt.Println("---")
-				fmt.Println(x.Name.Value)
-				fmt.Println("===")
 				cmd := x.Body.Cmd
+				if cmd == nil {
+					return false
+				}
 
 				block, ok := cmd.(*syntax.Block)
 				if !ok {
@@ -125,36 +125,15 @@ func bashit(path string) error {
 					printer.Print(buf, stmt)
 					fmt.Fprintln(buf)
 				}
-				fmt.Println(buf.String())
+			if x.Name == nil {
+				return false
 			}
+			funcDecls[x.Name.Value] = buf.String()
 		}
 		return true
 	})
 
-	//syntax.NewPrinter().Print(os.Stdout, f)
 
-	return nil
-}
-
-func PkgBuild(pac *pack.Pack, path string) (err error) {
-	if err := bashit(path); err != nil {
-		return err
-	}
-
-	file, err := utils.Open(path)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	return nil
-
-	n := 0
-	blockType := 0
-	blockKey := ""
-	blockData := ""
-	blockItems := []string{}
-	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
 		line := scanner.Text()

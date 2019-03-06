@@ -21,7 +21,7 @@ func ParsePkgBuild() (err error) {
 		if err = parse.PkgBuild(pac, path); err != nil {
 			return
 		}
-		//fmt.Printf("%#v\n", *pac)
+		return
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "   ")
 		enc.Encode(pac)

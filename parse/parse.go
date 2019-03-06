@@ -2,12 +2,16 @@ package parse
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/dropbox/godropbox/errors"
 	"github.com/pacur/pacur/pack"
 	"github.com/pacur/pacur/utils"
+	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/shell"
+	"mvdan.cc/sh/v3/syntax"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -61,14 +65,80 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 	return
 }
 
-func PkgBuild(pac *pack.Pack, path string) (err error) {
+func bashit(path string) error {
+	ctx := context.Background()
 
-	vars, sherr := shell.SourceFile(context.TODO(), path)
-	if sherr != nil {
-		return sherr
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("could not open: %v", err)
 	}
-	for key, val := range vars {
-		fmt.Printf("%#v\t%#v\t%#v\t%#v\n", key, val.Str, val.List, val.Map)
+	defer f.Close()
+	file, err := syntax.NewParser().Parse(f, path)
+	if err != nil {
+		return fmt.Errorf("could not parse: %v", err)
+	}
+
+	vars, err := shell.SourceNode(ctx, file)
+	if err != nil {
+		return err
+	}
+
+	/*	for key, val := range vars {
+		fmt.Printf("%#v\t", key)
+		switch val.Kind {
+		case expand.String:
+			fallthrough
+		case expand.NameRef:
+			fmt.Printf("%#v\n", val.Str)
+		case expand.Indexed:
+			fmt.Println()
+			for i, v := range val.List {
+				fmt.Printf("\t\t%d: %#v\n", i, v)
+			}
+		case expand.Associative:
+			fmt.Println()
+			for k, v := range val.Map {
+				fmt.Printf("\t\t%#v: %#v\n", k, v)
+			}
+		}
+	}*/
+	_ = expand.String
+	_ = vars
+
+	syntax.Walk(file, func(node syntax.Node) bool {
+		switch x := node.(type) {
+		case *syntax.FuncDecl:
+			if x.Name != nil {
+				fmt.Println("---")
+				fmt.Println(x.Name.Value)
+				fmt.Println("===")
+				cmd := x.Body.Cmd
+
+				block, ok := cmd.(*syntax.Block)
+				if !ok {
+					return false
+				}
+
+				buf := &bytes.Buffer{}
+				printer := syntax.NewPrinter()
+				for _, stmt := range block.Stmts {
+					printer.Print(buf, stmt)
+					fmt.Fprintln(buf)
+				}
+				fmt.Println(buf.String())
+			}
+		}
+		return true
+	})
+
+	//syntax.NewPrinter().Print(os.Stdout, f)
+
+	return nil
+}
+
+func PkgBuild(pac *pack.Pack, path string) (err error) {
+	if err := bashit(path); err != nil {
+		return err
 	}
 
 	file, err := utils.Open(path)
@@ -76,6 +146,8 @@ func PkgBuild(pac *pack.Pack, path string) (err error) {
 		return
 	}
 	defer file.Close()
+
+	return nil
 
 	n := 0
 	blockType := 0

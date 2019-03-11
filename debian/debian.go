@@ -43,7 +43,7 @@ func (d *Debian) getDepends() (err error) {
 }
 
 func (d *Debian) getSums() (err error) {
-	output, err := utils.ExecOutput(d.Pack.PackageDir, "find", ".",
+	output, err := utils.ExecOutput(d.Pack.PkgDir, "find", ".",
 		"-type", "f", "-exec", "md5sum", "{}", ";")
 	if err != nil {
 		return
@@ -197,12 +197,12 @@ func (d *Debian) clean() (err error) {
 }
 
 func (d *Debian) dpkgDeb() (err error) {
-	err = utils.Exec("", "dpkg-deb", "-b", d.Pack.PackageDir)
+	err = utils.Exec("", "dpkg-deb", "-b", d.Pack.PkgDir)
 	if err != nil {
 		return
 	}
 
-	_, dir := filepath.Split(filepath.Clean(d.Pack.PackageDir))
+	_, dir := filepath.Split(filepath.Clean(d.Pack.PkgDir))
 	path := filepath.Join(d.Pack.Root, dir+".deb")
 	newPath := filepath.Join(d.Pack.Home,
 		fmt.Sprintf("%s_%s-0%s%s.%s_%s.deb",
@@ -229,7 +229,7 @@ func (d *Debian) Prep() (err error) {
 }
 
 func (d *Debian) Build() (err error) {
-	d.installSize, err = utils.GetDirSize(d.Pack.PackageDir)
+	d.installSize, err = utils.GetDirSize(d.Pack.PkgDir)
 	if err != nil {
 		return
 	}
@@ -239,7 +239,7 @@ func (d *Debian) Build() (err error) {
 		return
 	}
 
-	d.debDir = filepath.Join(d.Pack.PackageDir, "DEBIAN")
+	d.debDir = filepath.Join(d.Pack.PkgDir, "DEBIAN")
 	err = utils.ExistsMakeDir(d.debDir)
 	if err != nil {
 		return

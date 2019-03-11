@@ -98,7 +98,7 @@ func (r *Redhat) getFiles() (files []string, err error) {
 		return
 	}
 
-	output, err := utils.ExecOutput(r.Pack.PackageDir, "rpm", "-qlp", rpmPath)
+	output, err := utils.ExecOutput(r.Pack.PkgDir, "rpm", "-qlp", rpmPath)
 	if err != nil {
 		return
 	}
@@ -179,7 +179,7 @@ func (r *Redhat) createSpec(files []string) (err error) {
 
 	data += "%install\n"
 	data += fmt.Sprintf("rsync -a -A %s/ $RPM_BUILD_ROOT/\n",
-		r.Pack.PackageDir)
+		r.Pack.PkgDir)
 	data += "\n"
 
 	data += "%files\n"

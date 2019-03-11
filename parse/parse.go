@@ -48,12 +48,12 @@ func File(distro, release, home string) (pac *pack.Pack, err error) {
 	path := filepath.Join(root, "PKGBUILD")
 
 	pac = &pack.Pack{
-		Distro:     distro,
-		Release:    release,
-		Root:       root,
-		Home:       home,
-		SourceDir:  filepath.Join(root, "src"),
-		PackageDir: filepath.Join(root, "pkg"),
+		Distro:  distro,
+		Release: release,
+		Root:    root,
+		Home:    home,
+		SrcDir:  filepath.Join(root, "src"),
+		PkgDir:  filepath.Join(root, "pkg"),
 	}
 
 	pac.Init()
@@ -82,25 +82,25 @@ func PkgBuild(pac *pack.Pack, path string) (err error) {
 		return errors.Newf("parse: SourceNode on file %#v: %v", path, err)
 	}
 
-/*		for key, val := range vars {
-		fmt.Printf("%#v\t", key)
-		switch val.Kind {
-		case expand.String:
-			fallthrough
-		case expand.NameRef:
-			fmt.Printf("%#v\n", val.Str)
-		case expand.Indexed:
-			fmt.Println()
-			for i, v := range val.List {
-				fmt.Printf("\t\t%d: %#v\n", i, v)
+	/*		for key, val := range vars {
+			fmt.Printf("%#v\t", key)
+			switch val.Kind {
+			case expand.String:
+				fallthrough
+			case expand.NameRef:
+				fmt.Printf("%#v\n", val.Str)
+			case expand.Indexed:
+				fmt.Println()
+				for i, v := range val.List {
+					fmt.Printf("\t\t%d: %#v\n", i, v)
+				}
+			case expand.Associative:
+				fmt.Println()
+				for k, v := range val.Map {
+					fmt.Printf("\t\t%#v: %#v\n", k, v)
+				}
 			}
-		case expand.Associative:
-			fmt.Println()
-			for k, v := range val.Map {
-				fmt.Printf("\t\t%#v: %#v\n", k, v)
-			}
-		}
-	}*/
+		}*/
 	_ = expand.String
 	_ = vars
 
@@ -109,22 +109,22 @@ func PkgBuild(pac *pack.Pack, path string) (err error) {
 	syntax.Walk(rootNode, func(node syntax.Node) bool {
 		switch x := node.(type) {
 		case *syntax.FuncDecl:
-				cmd := x.Body.Cmd
-				if cmd == nil {
-					return false
-				}
+			cmd := x.Body.Cmd
+			if cmd == nil {
+				return false
+			}
 
-				block, ok := cmd.(*syntax.Block)
-				if !ok {
-					return false
-				}
+			block, ok := cmd.(*syntax.Block)
+			if !ok {
+				return false
+			}
 
-				buf := &bytes.Buffer{}
-				printer := syntax.NewPrinter()
-				for _, stmt := range block.Stmts {
-					printer.Print(buf, stmt)
-					fmt.Fprintln(buf)
-				}
+			buf := &bytes.Buffer{}
+			printer := syntax.NewPrinter()
+			for _, stmt := range block.Stmts {
+				printer.Print(buf, stmt)
+				fmt.Fprintln(buf)
+			}
 			if x.Name == nil {
 				return false
 			}
@@ -132,8 +132,6 @@ func PkgBuild(pac *pack.Pack, path string) (err error) {
 		}
 		return true
 	})
-
-
 
 	for scanner.Scan() {
 		line := scanner.Text()

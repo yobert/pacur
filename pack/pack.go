@@ -8,14 +8,15 @@ import (
 )
 
 type Pack struct {
+	// Metadata
 	Targets     []string
 	Distro      string
 	Release     string
 	FullRelease string
 	Root        string
 	Home        string
-	SourceDir   string
-	PackageDir  string
+	SrcDir      string
+	PkgDir      string
 	PkgName     string
 	PkgVer      string
 	PkgRel      string
@@ -35,12 +36,14 @@ type Pack struct {
 	Sources     []string
 	HashSums    []string
 	Backup      []string
-	Build       []string
-	Package     []string
-	PreInst     []string
-	PostInst    []string
-	PreRm       []string
-	PostRm      []string
+
+	// Function bodies (lists of command lines)
+	Build    []string
+	Package  []string
+	PreInst  []string
+	PostInst []string
+	PreRm    []string
+	PostRm   []string
 }
 
 func (p *Pack) Init() {
@@ -111,8 +114,8 @@ func (p *Pack) Resolve() (err error) {
 
 	reslv.AddList("targets", p.Targets)
 	reslv.Add("root", &p.Root)
-	reslv.Add("srcdir", &p.SourceDir)
-	reslv.Add("pkgdir", &p.PackageDir)
+	reslv.Add("srcdir", &p.SrcDir)
+	reslv.Add("pkgdir", &p.PkgDir)
 	reslv.Add("pkgname", &p.PkgName)
 	reslv.Add("pkgver", &p.PkgVer)
 	reslv.Add("pkgrel", &p.PkgRel)

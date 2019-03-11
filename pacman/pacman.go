@@ -179,7 +179,7 @@ func (p *Pacman) createMake() (err error) {
 
 	data += "package() {\n"
 	data += fmt.Sprintf("    rsync -a -A %s/ ${pkgdir}/\n",
-		p.Pack.PackageDir)
+		p.Pack.PkgDir)
 	data += "}\n"
 
 	err = utils.CreateWrite(path, data)
@@ -198,7 +198,7 @@ func (p *Pacman) pacmanBuild() (err error) {
 		return
 	}
 
-	err = utils.ChownR(p.Pack.PackageDir, "nobody", "nobody")
+	err = utils.ChownR(p.Pack.PkgDir, "nobody", "nobody")
 	if err != nil {
 		return
 	}

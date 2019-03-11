@@ -15,12 +15,12 @@ type Builder struct {
 }
 
 func (b *Builder) initDirs() (err error) {
-	err = utils.ExistsMakeDir(b.Pack.SourceDir)
+	err = utils.ExistsMakeDir(b.Pack.SrcDir)
 	if err != nil {
 		return
 	}
 
-	err = utils.ExistsMakeDir(b.Pack.PackageDir)
+	err = utils.ExistsMakeDir(b.Pack.PkgDir)
 	if err != nil {
 		return
 	}
@@ -34,7 +34,7 @@ func (b *Builder) getSources() (err error) {
 			Root:   b.Pack.Root,
 			Hash:   b.Pack.HashSums[i],
 			Source: path,
-			Output: b.Pack.SourceDir,
+			Output: b.Pack.SrcDir,
 		}
 
 		err = source.Get()
@@ -56,7 +56,7 @@ func (b *Builder) build() (err error) {
 		return
 	}
 
-	err = runScript(path, b.Pack.SourceDir)
+	err = runScript(path, b.Pack.SrcDir)
 	if err != nil {
 		return
 	}
@@ -74,7 +74,7 @@ func (b *Builder) pkg() (err error) {
 		return
 	}
 
-	err = runScript(path, b.Pack.SourceDir)
+	err = runScript(path, b.Pack.SrcDir)
 	if err != nil {
 		return
 	}
